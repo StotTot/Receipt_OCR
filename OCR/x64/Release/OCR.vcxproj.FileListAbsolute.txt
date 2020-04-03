@@ -1,0 +1,2 @@
+C:\Users\Stot_\source\repos\OCR\OCR\x64\Release\OCR.vcxproj.CopyComplete
+C:\Users\Stot_\OneDrive\Documents\425\Receipt_OCR\OCR\x64\Release\OCR.vcxproj.CopyComplete

@@ -1,0 +1,9 @@
+﻿  Source.cpp
+Source.obj : error LNK2019: unresolved external symbol "public: __thiscall tesseract::TessBaseAPI::TessBaseAPI(void)" (??0TessBaseAPI@tesseract@@QAE@XZ) referenced in function _main
+Source.obj : error LNK2019: unresolved external symbol "public: int __thiscall tesseract::TessBaseAPI::Init(char const *,char const *,enum tesseract::OcrEngineMode,char * *,int,class GenericVector<class STRING> const *,class GenericVector<class STRING> const *,bool)" (?Init@TessBaseAPI@tesseract@@QAEHPBD0W4OcrEngineMode@2@PAPADHPBV?$GenericVector@VSTRING@@@@3_N@Z) referenced in function "public: int __thiscall tesseract::TessBaseAPI::Init(char const *,char const *)" (?Init@TessBaseAPI@tesseract@@QAEHPBD0@Z)
+Source.obj : error LNK2019: unresolved external symbol "public: void __thiscall tesseract::TessBaseAPI::SetImage(struct Pix *)" (?SetImage@TessBaseAPI@tesseract@@QAEXPAUPix@@@Z) referenced in function _main
+Source.obj : error LNK2019: unresolved external symbol "public: char * __thiscall tesseract::TessBaseAPI::GetUTF8Text(void)" (?GetUTF8Text@TessBaseAPI@tesseract@@QAEPADXZ) referenced in function _main
+Source.obj : error LNK2019: unresolved external symbol "public: void __thiscall tesseract::TessBaseAPI::End(void)" (?End@TessBaseAPI@tesseract@@QAEXXZ) referenced in function _main
+Source.obj : error LNK2019: unresolved external symbol _pixDestroy referenced in function _main
+Source.obj : error LNK2019: unresolved external symbol _pixRead referenced in function _main
+C:\Users\Stot_\source\repos\OCR\Debug\OCR.exe : fatal error LNK1120: 7 unresolved externals
