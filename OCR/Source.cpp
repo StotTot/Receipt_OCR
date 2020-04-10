@@ -45,7 +45,6 @@ void OCR_read(std::string datafile) {
     pixDestroy(&image);
 }
 
-
 int insert_DB(double total, std::string textFile) {
     //Database conneciton
 
@@ -81,8 +80,16 @@ int insert_DB(double total, std::string textFile) {
             std::cout << "Can't open database" << std::endl;
             return 1;
         }
-
-        /* Create SQL statement */
+        //create table
+        std::string test("CREATE TABLE public.\"RECEIPTS\"("  \
+            "\"PURCH_ID\" integer NOT NULL DEFAULT nextval('\"RECEIPTS_PURCH_ID_seq\"'::regclass)," \
+            "\"PURCH_TOTAL\" money," \
+            "\"PURCH_DATE\" date," \
+            "\"FILE_NAME\" name COLLATE pg_catalog.\"default\"," \
+            "\"TEXT_DATA\" text COLLATE pg_catalog.\"default\"," \
+            "CONSTRAINT \"RECEIPTS_pkey\" PRIMARY KEY(\"PURCH_ID\"));");
+        //TODO: remove error statement everytime the table attempts to be created.
+        
         std::string str1("INSERT INTO public.\"RECEIPTS\"(\"PURCH_TOTAL\", \"FILE_NAME\", \"TEXT_DATA\") "   \
             "VALUES (value1, 'value2', 'value3');");
 
@@ -108,6 +115,8 @@ int insert_DB(double total, std::string textFile) {
         pqxx::work W(C);
 
         /* Execute SQL query */
+
+        W.exec(test);
         W.exec(sql);
         W.commit();
         std::cout << "Records created successfully" << std::endl;
@@ -163,7 +172,7 @@ std::string print_UI(int x) {
         std::cout << "Once you do, hit any button to continue.\n";
         system("pause");
     }
-    std::cout << "Please type the name of the receipt\n";
+    std::cout << "Please type the name of the receipt with extension.\n";
     std::cin >> textFile;
 
     return textFile;
