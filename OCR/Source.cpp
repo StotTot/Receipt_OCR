@@ -6,20 +6,21 @@
 #include <string>
 
 
-
+char* outText;
 float total;
 void OCR_read() {
 
     std::ofstream temp("temp.txt");
     
-    char* outText;
+    
 
     tesseract::TessBaseAPI* api = new tesseract::TessBaseAPI();
-    // Initialize tesseract-ocr with English, without specifying tessdata path
-    if (api->Init(NULL, "eng")) {
+    //Initialize tesseract-ocr with English, without specifying tessdata path
+    if (api->Init("C:\\tessdata", "eng")) {
         fprintf(stderr, "Could not initialize tesseract.\n");
         exit(1);
     }
+    
 
     // Open input image with leptonica library
     Pix* image = pixRead("/path to image/");
@@ -48,11 +49,26 @@ int insert_DB(double total) {
     //Database conneciton
 
     std::string sql;
+    std::string user, pass, cline;
+    std::string cred[2];
+    std::ifstream credentials;
+    int ccount = 0;
+    credentials.open("C:\\OCR_cred.txt");
+    while (std::getline(credentials, cline)) {
+        cred[ccount] = cline;
+        ccount++;
+    }
+    user = cred[0];
+    pass = cred[1];
+    std::string connstring = "dbname = OCR user = yourserveruser password = yourserverpass \
+        hostaddr = 127.0.0.1 port = 5432";
+    while (connstring.find("yourserveruser") != std::string::npos)
+        connstring.replace(connstring.find("yourserveruser"), 14, user);
+    while (connstring.find("yourserverpass") != std::string::npos)
+        connstring.replace(connstring.find("yourserverpass"), 14, pass);
 
     try {
-        pqxx::connection C(
-            "dbname = OCR user = yourserveruser password = yourserverpass \
-        hostaddr = 127.0.0.1 port = 5432");
+        pqxx::connection C(connstring);
         if (C.is_open()) {
             std::cout << "Opened database successfully: " << C.dbname() << std::endl;
         }
@@ -63,7 +79,7 @@ int insert_DB(double total) {
 
         /* Create SQL statement */
         std::string str1("INSERT INTO public.\"RECEIPTS\" (\"PURCH_TOTAL\") "  \
-            "VALUES (); ");
+            "VALUES ();");
         std::string str2(std::to_string(total));
         str1.insert(54, str2);
        
@@ -93,7 +109,7 @@ float parse() {
     
     std::string line, token = "TOTAL ";
    //This currently finds both the subtotal and total line
-   //TODO: Needs to only look for the total line
+   //TODO: Look for other lines
     while (std::getline(ifile, line)) {
         if (line.find(token) != std::string::npos) {
             std::cout << line << std::endl;
