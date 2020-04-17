@@ -19,7 +19,7 @@ void OCR_read(std::string datafile) {
     char* path = &receipt_path[0];
     tesseract::TessBaseAPI* api = new tesseract::TessBaseAPI();
     //Initialize tesseract-ocr with English, without specifying tessdata path
-    if (api->Init("C:\\tessdata", "eng")) {
+    if (api->Init("C:\\Program Files\\Tesseract-OCR\\tessdata", "eng")) {
         fprintf(stderr, "Could not initialize tesseract.\n");
         exit(1);
     }
@@ -61,7 +61,7 @@ bool tableExist(std::string connstring) {
         }
         //create table
         std::string test("CREATE TABLE public.\"RECEIPTS\"("  \
-            "\"PURCH_ID\" integer NOT NULL DEFAULT nextval('\"RECEIPTS_PURCH_ID_seq\"'::regclass)," \
+            "\"PURCH_ID\" SERIAL NOT NULL ," \
             "\"PURCH_TOTAL\" money," \
             "\"PURCH_DATE\" date," \
             "\"FILE_NAME\" name COLLATE pg_catalog.\"default\"," \
