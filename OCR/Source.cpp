@@ -183,8 +183,12 @@ float parse_total(std::string data) {
         total = ::atof(sub.c_str());
     }
     else {
-        sub.insert(sub.length() - 2, dot);
-        total = ::atof(sub.c_str());
+        if (sub.length() > 3) {
+            sub.insert(sub.length() - 2, dot);
+            total = ::atof(sub.c_str());
+        }
+        else
+            total = 0;
     }
         
 
