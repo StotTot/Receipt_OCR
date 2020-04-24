@@ -210,7 +210,9 @@ std::string parse_date(std::string data) {
             return temp_dt;
         }
     } 
-    temp_dt = "Couldn't find the date";
+    
+    temp_dt = "12/31/45";
+    std::cout << "Couldn't find the date\n";
     return temp_dt;
 }
 
