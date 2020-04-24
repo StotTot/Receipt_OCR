@@ -11,7 +11,7 @@ char* outText;
 float total;
 std::string dt, temp_dt, contents, receipt_path;
 
-std::string OCR_read(std::string datafile) {
+void OCR_read(std::string datafile) {
 
     std::ofstream temp("temp.txt");
     
@@ -19,7 +19,7 @@ std::string OCR_read(std::string datafile) {
     char* path = &receipt_path[0];
     tesseract::TessBaseAPI* api = new tesseract::TessBaseAPI();
     //Initialize tesseract-ocr with English, without specifying tessdata path
-    if (api->Init("C:\\Program Files\\Tesseract-OCR\\tessdata", "eng")) {
+    if (api->Init("C:\\tessdata", "eng")) {
         fprintf(stderr, "Could not initialize tesseract.\n");
         exit(1);
     }
@@ -42,11 +42,9 @@ std::string OCR_read(std::string datafile) {
 
     // Destroy used object and release memory
     api->End();
-    contents = std::string(outText);
     delete api;
     delete[] outText;
     pixDestroy(&image);
-    return contents;
 }
 
 
@@ -61,8 +59,9 @@ bool tableExist(std::string connstring) {
             std::cout << "Can't open database" << std::endl;
             return 1;
         }
+
         //create table
-        std::string test("CREATE TABLE public.\"RECEIPTS\"("  \
+        std::string test("CREATE TABLE IF NOT EXISTS public.\"RECEIPTS\"("  \
             "\"PURCH_ID\" SERIAL NOT NULL ," \
             "\"PURCH_TOTAL\" money," \
             "\"PURCH_DATE\" date," \
@@ -159,49 +158,40 @@ int insert_DB(double total, std::string date, std::string textFile) {
 
 }
 
-float parse_total(std::string data) {
+float parse_total() {
 
-    std::string sub, dot = ".";
-    std::stringstream sst(data);
-    //std::regex money()
+
+    std::ifstream ifile("temp.txt");
+
     std::string line, token = "TOTAL ";
     //This currently finds both the subtotal and total line
     //TODO: Look for other lines
-    while (std::getline(sst, line)) {
+    while (std::getline(ifile, line)) {
         if (line.find(token) != std::string::npos) {
             std::cout << line << std::endl;
             // Find position of ':' using find() 
             int pos = line.find("TOTAL");
 
             // Copy substring after pos 
-            sub = line.substr(pos + 6);
-            
+            std::string sub = line.substr(pos + 6);
+            total = ::atof(sub.c_str());
         }
     }
-    //checks if there is a decimal, if not it adds one before the last two digits
-    if (sub.find(dot) != std::string::npos) {
-        total = ::atof(sub.c_str());
-    }
-    else {
-        sub.insert(sub.length() - 2, dot);
-        total = ::atof(sub.c_str());
-    }
-        
-
+    ifile.close();
     std::cout << "$" << total << std::endl;
     return total;
 }
 
-std::string parse_date(std::string data) {
+std::string parse_date() {
 
     std::regex d("[0-9]{2}/[0-9]{2}/[0-9]{2}");
     std::smatch m;
+    std::ifstream ifile("temp.txt");
 
-    std::stringstream ssd(data);
     std::string line;
     //This currently finds both the subtotal and total line
 
-    while (std::getline(ssd, line)) {
+    while (std::getline(ifile, line)) {
         if (std::regex_search(line, m, d)) {
             for (auto x : m) std::cout << x << " ";
             std::cout << std::endl;
@@ -246,8 +236,8 @@ int main() {
         std::string textFile = "";
         textFile = print_UI(usrInpt);
         OCR_read(textFile);
-        total = parse_total(contents);
-        dt = parse_date(contents);
+        total = parse_total();
+        dt = parse_date();
         std::cout << temp_dt << std::endl;
         dt = temp_dt.substr(0, 8);
         std::cout << dt << std::endl;
