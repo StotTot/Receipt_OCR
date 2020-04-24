@@ -86,7 +86,6 @@ bool tableExist(std::string connstring) {
             "\"FILE_NAME\" name COLLATE pg_catalog.\"default\"," \
             "\"TEXT_DATA\" text COLLATE pg_catalog.\"default\"," \
             "CONSTRAINT \"RECEIPTS_pkey\" PRIMARY KEY(\"PURCH_ID\"));");
-        //TODO: remove error statement everytime the table attempts to be created.
 
         pqxx::work T(C);
 
