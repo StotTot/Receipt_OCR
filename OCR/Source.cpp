@@ -11,7 +11,7 @@ char* outText;
 float total;
 std::string dt, temp_dt, contents, receipt_path;
 
-void OCR_read(std::string datafile) {
+std::string OCR_read(std::string datafile) {
 
     std::ofstream temp("temp.txt");
     
@@ -42,9 +42,11 @@ void OCR_read(std::string datafile) {
 
     // Destroy used object and release memory
     api->End();
+    contents = std::string(outText);
     delete api;
     delete[] outText;
     pixDestroy(&image);
+    return contents;
 }
 
 
@@ -157,40 +159,49 @@ int insert_DB(double total, std::string date, std::string textFile) {
 
 }
 
-float parse_total() {
+float parse_total(std::string data) {
 
-
-    std::ifstream ifile("temp.txt");
-
+    std::string sub, dot = ".";
+    std::stringstream sst(data);
+    //std::regex money()
     std::string line, token = "TOTAL ";
     //This currently finds both the subtotal and total line
     //TODO: Look for other lines
-    while (std::getline(ifile, line)) {
+    while (std::getline(sst, line)) {
         if (line.find(token) != std::string::npos) {
             std::cout << line << std::endl;
             // Find position of ':' using find() 
             int pos = line.find("TOTAL");
 
             // Copy substring after pos 
-            std::string sub = line.substr(pos + 6);
-            total = ::atof(sub.c_str());
+            sub = line.substr(pos + 6);
+            
         }
     }
-    ifile.close();
+    //checks if there is a decimal, if not it adds one before the last two digits
+    if (sub.find(dot) != std::string::npos) {
+        total = ::atof(sub.c_str());
+    }
+    else {
+        sub.insert(sub.length() - 2, dot);
+        total = ::atof(sub.c_str());
+    }
+        
+
     std::cout << "$" << total << std::endl;
     return total;
 }
 
-std::string parse_date() {
+std::string parse_date(std::string data) {
 
     std::regex d("[0-9]{2}/[0-9]{2}/[0-9]{2}");
     std::smatch m;
-    std::ifstream ifile("temp.txt");
 
+    std::stringstream ssd(data);
     std::string line;
     //This currently finds both the subtotal and total line
 
-    while (std::getline(ifile, line)) {
+    while (std::getline(ssd, line)) {
         if (std::regex_search(line, m, d)) {
             for (auto x : m) std::cout << x << " ";
             std::cout << std::endl;
@@ -235,8 +246,8 @@ int main() {
         std::string textFile = "";
         textFile = print_UI(usrInpt);
         OCR_read(textFile);
-        total = parse_total();
-        dt = parse_date();
+        total = parse_total(contents);
+        dt = parse_date(contents);
         std::cout << temp_dt << std::endl;
         dt = temp_dt.substr(0, 8);
         std::cout << dt << std::endl;
