@@ -5,11 +5,14 @@
 #include "pqxx/pqxx"
 #include <string>
 #include <regex>
-#include <filesystem>
+
+
 
 char* outText;
 float total;
 std::string dt, temp_dt, contents, receipt_path;
+
+
 
 std::string OCR_read(std::string datafile) {
 
@@ -37,7 +40,7 @@ std::string OCR_read(std::string datafile) {
     //Remove colormap of image and turn into gray scale
     imageg2 = pixRemoveColormap(imageg1, REMOVE_CMAP_TO_GRAYSCALE);
     pixDestroy(&imageg1);
-    //check if image is black and white (biinary)
+    //check if image is black and white (binary)
     if (pixGetDepth(imageg2) == 1)
         image = pixClone(imageg2);
     //upscale the image
@@ -150,6 +153,9 @@ int insert_DB(double total, std::string date, std::string textFile) {
         contents.assign((std::istreambuf_iterator<char>(data)),
             (std::istreambuf_iterator<char>()));
 
+        while (contents.find("'") != std::string::npos)
+            contents.replace(contents.find("'"), 1, "''");
+
         while (str1.find("value1") != std::string::npos)
             str1.replace(str1.find("value1"), 6, str2);
         while (str1.find("value2") != std::string::npos)
@@ -159,7 +165,7 @@ int insert_DB(double total, std::string date, std::string textFile) {
         while (str1.find("value4") != std::string::npos)
             str1.replace(str1.find("value4"), 6, contents);
 
-        //std::cout << str1 << std::endl;
+       
 
         sql = str1;
 
@@ -187,7 +193,7 @@ float parse_total(std::string data) {
     while (std::getline(sst, line)) {
         if (line.find(token) != std::string::npos) {
             std::cout << line << std::endl;
-            // Find position of ':' using find() 
+            // Find position of 'TOTAL' using find() 
             int pos = line.find("TOTAL");
 
             // Copy substring after pos 
