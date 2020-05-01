@@ -41,8 +41,9 @@ std::string OCR_read(std::string datafile) {
     if (pixGetDepth(imageg2) == 1)
         image = pixClone(imageg2);
     //upscale the image
+    //using pixScaleGray4xLIThresh will increase accuracy of the numbers but returns special characters as well. pixThresholdToBinary is used for now.
     else
-        image = pixScaleGray4xLIThresh(imageg2, 128);
+        image = pixThresholdToBinary(imageg2, 128);
     pixDestroy(&imageg2);
     api->SetImage(image);
     // Get OCR result
