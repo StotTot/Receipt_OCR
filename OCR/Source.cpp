@@ -6,7 +6,7 @@
 #include <string>
 #include <regex>
 #include <filesystem>
- 
+
 char* outText;
 float total;
 std::string dt, temp_dt, contents, receipt_path;
@@ -14,7 +14,7 @@ std::string dt, temp_dt, contents, receipt_path;
 std::string OCR_read(std::string datafile) {
 
     std::ofstream temp("temp.txt");
-    
+
     receipt_path = "C:\\Receipts\\" + datafile;
     char* path = &receipt_path[0];
     tesseract::TessBaseAPI* api = new tesseract::TessBaseAPI();
@@ -24,9 +24,27 @@ std::string OCR_read(std::string datafile) {
         exit(1);
     }
 
-
+    Pix* imageOri, *imageg1, *imageg2, *image;
     // Open input image with leptonica library
-    Pix* image = pixRead(path);
+    imageOri = pixRead(path);
+    //Convert image to binary
+    //If the image is rgb, onvert rgb image to 8bpp
+    if (pixGetDepth(imageOri) == 32)
+        imageg1 = pixConvertRGBToLuminance(imageOri);
+    else
+        imageg1 = pixClone(imageOri);
+    pixDestroy(&imageOri);
+    //Remove colormap of image and turn into gray scale
+    imageg2 = pixRemoveColormap(imageg1, REMOVE_CMAP_TO_GRAYSCALE);
+    pixDestroy(&imageg1);
+    //check if image is black and white (biinary)
+    if (pixGetDepth(imageg2) == 1)
+        image = pixClone(imageg2);
+    //upscale the image
+    //using pixScaleGray4xLIThresh will increase accuracy of the numbers but returns special characters as well. pixThresholdToBinary is used for now.
+    else
+        image = pixThresholdToBinary(imageg2, 128);
+    pixDestroy(&imageg2);
     api->SetImage(image);
     // Get OCR result
     outText = api->GetUTF8Text();
@@ -62,14 +80,13 @@ bool tableExist(std::string connstring) {
             return 1;
         }
         //create table
-        std::string test("CREATE TABLE public.\"RECEIPTS\"("  \
+        std::string test("CREATE TABLE IF NOT EXISTS public.\"RECEIPTS\"("  \
             "\"PURCH_ID\" SERIAL NOT NULL ," \
             "\"PURCH_TOTAL\" money," \
             "\"PURCH_DATE\" date," \
             "\"FILE_NAME\" name COLLATE pg_catalog.\"default\"," \
             "\"TEXT_DATA\" text COLLATE pg_catalog.\"default\"," \
             "CONSTRAINT \"RECEIPTS_pkey\" PRIMARY KEY(\"PURCH_ID\"));");
-        //TODO: remove error statement everytime the table attempts to be created.
 
         pqxx::work T(C);
 
@@ -80,7 +97,7 @@ bool tableExist(std::string connstring) {
         C.disconnect();
 
     }
-    catch (const std::exception& e) {
+    catch (const std::exception & e) {
         std::cerr << e.what() << std::endl;
         return 1;
     }
@@ -93,7 +110,7 @@ int insert_DB(double total, std::string date, std::string textFile) {
     std::string user, pass, cline;
     std::string cred[2];
     std::ifstream credentials, data;
-    
+
     int ccount = 0;
     credentials.open("C:\\OCR_cred.txt");
     while (std::getline(credentials, cline)) {
@@ -108,7 +125,7 @@ int insert_DB(double total, std::string date, std::string textFile) {
         connstring.replace(connstring.find("yourserveruser"), 14, user);
     while (connstring.find("yourserverpass") != std::string::npos)
         connstring.replace(connstring.find("yourserverpass"), 14, pass);
-    
+
     tableExist(connstring);
 
 
@@ -122,7 +139,7 @@ int insert_DB(double total, std::string date, std::string textFile) {
             std::cout << "Can't open database" << std::endl;
             return 1;
         }
-        
+
         std::string str1("INSERT INTO public.\"RECEIPTS\"(\"PURCH_TOTAL\", \"PURCH_DATE\", \"FILE_NAME\", \"TEXT_DATA\") "   \
             "VALUES (value1, 'value2', 'value3', 'value4');");
 
@@ -152,7 +169,7 @@ int insert_DB(double total, std::string date, std::string textFile) {
         std::cout << "Records created successfully" << std::endl;
         C.disconnect();
     }
-    catch (const std::exception& e) {
+    catch (const std::exception & e) {
         std::cerr << e.what() << std::endl;
         return 1;
     }
@@ -175,7 +192,7 @@ float parse_total(std::string data) {
 
             // Copy substring after pos 
             sub = line.substr(pos + 6);
-            
+
         }
     }
     //checks if there is a decimal, if not it adds one before the last two digits
@@ -183,10 +200,14 @@ float parse_total(std::string data) {
         total = ::atof(sub.c_str());
     }
     else {
-        sub.insert(sub.length() - 2, dot);
-        total = ::atof(sub.c_str());
+        if (sub.length() > 3) {
+            sub.insert(sub.length() - 2, dot);
+            total = ::atof(sub.c_str());
+        }
+        else
+            total = 0;
     }
-        
+
 
     std::cout << "$" << total << std::endl;
     return total;
@@ -206,11 +227,11 @@ std::string parse_date(std::string data) {
             for (auto x : m) std::cout << x << " ";
             std::cout << std::endl;
             temp_dt = m.str();
-            
+
             return temp_dt;
         }
-    } 
-    
+    }
+
     temp_dt = "12/31/45";
     std::cout << "Couldn't find the date\n";
     return temp_dt;
