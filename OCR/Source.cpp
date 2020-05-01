@@ -44,6 +44,7 @@ std::string OCR_read(std::string datafile) {
     if (pixGetDepth(imageg2) == 1)
         image = pixClone(imageg2);
     //upscale the image
+    //using pixScaleGray4xLIThresh will increase accuracy of the numbers but returns special characters as well. pixThresholdToBinary is used for now.
     else
         image = pixThresholdToBinary(imageg2, 128);
     pixDestroy(&imageg2);
@@ -89,7 +90,6 @@ bool tableExist(std::string connstring) {
             "\"FILE_NAME\" name COLLATE pg_catalog.\"default\"," \
             "\"TEXT_DATA\" text COLLATE pg_catalog.\"default\"," \
             "CONSTRAINT \"RECEIPTS_pkey\" PRIMARY KEY(\"PURCH_ID\"));");
-        //TODO: remove error statement everytime the table attempts to be created.
 
         pqxx::work T(C);
 
