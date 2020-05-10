@@ -44,7 +44,7 @@ std::string OCR_read(std::string datafile) {
     if (pixGetDepth(imageg2) == 1)
         image = pixClone(imageg2);
     //upscale the image
-    //using pixScaleGray4xLIThresh will increase accuracy of the numbers but returns special characters as well. pixThresholdToBinary is used for now.
+    
     else
         image = pixThresholdToBinary(imageg2, 128);
     pixDestroy(&imageg2);
@@ -155,6 +155,7 @@ int insert_DB(double total, std::string date, std::string textFile) {
 
         while (contents.find("'") != std::string::npos)
             contents.replace(contents.find("'"), 1, "''");
+
 
         while (str1.find("value1") != std::string::npos)
             str1.replace(str1.find("value1"), 6, str2);
