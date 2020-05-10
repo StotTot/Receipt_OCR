@@ -190,7 +190,7 @@ float parse_total(std::string data) {
     //std::regex money()
     std::string line, token = "TOTAL ";
     //This currently finds both the subtotal and total line
-    //TODO: Look for other lines
+
     while (std::getline(sst, line)) {
         if (line.find(token) != std::string::npos) {
             std::cout << line << std::endl;
