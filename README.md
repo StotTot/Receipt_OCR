@@ -1,6 +1,6 @@
 # Receipt_OCR
 
-Inorder to build you must have
+In order to build you must have
 tesseract, leptonica, and pqxx (postgreSQL sdk for c++)
 installed for your configuration (debug/release, x86/x64).
 
